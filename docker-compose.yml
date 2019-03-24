@@ -1,0 +1,45 @@
+version: '3.3'
+
+services:
+  dev:
+    build:
+      context: .
+      args:
+        http_proxy: "$http_proxy"
+        https_proxy: "$https_proxy"
+        no_proxy: "$no_proxy"
+        COMPILE_THREADS: "$COMPILE_THREADS"
+        USER_NAME: "$USER_NAME"
+        USER_PASSWORD: "$USER_PASSWORD"
+        USER_ID: "$USER_ID"
+        USER_GID: "$USER_GID"
+        DOCKER_VERSION: "$DOCKER_VERSION"
+        DOCKER_GID: "$DOCKER_GID"
+        DOCKER_COMPOSE_VERSION: "$DOCKER_COMPOSE_VERSION"
+        JAVA_CANDIDATE: "$JAVA_CANDIDATE"
+        NVM_VERSION: "$NVM_VERSION"
+        NODE_VERSIONS: "$NODE_VERSIONS"
+        YVM_VERSION: "$YVM_VERSION"
+        YARN_VERSIONS: "$YARN_VERSIONS"
+    image: "$IMAGE_NAME"
+    stdin_open: true
+    tty: true
+    privileged: true
+    environment:
+      DISPLAY: "$DISPLAY"
+    volumes:
+      # to display vsc, chrome
+      - "/tmp/.X11-unix:/tmp/.X11-unix"
+      # deploy android app
+      - "/dev/bus/usb:/dev/bus/usb"
+      # run docker commands
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "maven-m2:/home/$USER_NAME/.m2"
+      - "gradle-dot:/home/$USER_NAME/.gradle"
+      - "workspace:/home/$USER_NAME/workspace"
+    restart: unless-stopped
+
+volumes:
+  workspace:
+  maven-m2:
+  gradle-dot:
