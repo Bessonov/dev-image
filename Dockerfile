@@ -33,12 +33,16 @@ RUN	apt-get update && \
 		autoconf automake build-essential python-dev libssl-dev libtool pkg-config \
 		# for android sdk
 		libc6-i386 lib32stdc++6 lib32gcc1 lib32ncurses5 lib32z1 \
+		# for android uiautomatorviewer
+		libswt-gtk-3-java libswt-gtk-3-jni \
 		# for docker
 		apt-transport-https ca-certificates curl wget gnupg2 software-properties-common \
 		# for sdkman
 		zip unzip \
 		# for cordova-icon
 		imagemagick \
+		# for react-devtools / electron
+		libgconf-2-4 \
 		# for aws cli
 		groff \
 		&& \
