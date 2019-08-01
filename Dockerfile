@@ -145,7 +145,7 @@ WORKDIR	${HOME}
 
 	# install NVM
 ARG	NVM_VERSION
-RUN	curl -o- https://raw.githubusercontent.com/creationix/nvm/$NVM_VERSION/install.sh | PROFILE=~/.profile bash
+RUN	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh | PROFILE=~/.profile bash
 
 	# install node
 ARG	NODE_VERSIONS
@@ -153,7 +153,7 @@ RUN	for VERSION in $NODE_VERSIONS; do nvm install $VERSION; done
 
 	# install yvm
 ARG	YVM_VERSION
-RUN curl -fsSL https://raw.githubusercontent.com/tophat/yvm/$YVM_VERSION/scripts/install.sh | sed 's/\.bashrc/\.profile/g' | INSTALL_VERSION="$YVM_VERSION" bash
+RUN	curl -fsSL https://raw.githubusercontent.com/tophat/yvm/master/scripts/install.js | INSTALL_VERSION="$YVM_VERSION" PROFILE=~/.profile node
 
 	# install yarn
 ARG	YARN_VERSIONS
@@ -168,9 +168,11 @@ RUN	curl -O https://bootstrap.pypa.io/get-pip.py && \
 
 	# prepare volumes
 RUN	mkdir ${HOME}/workspace
+RUN	mkdir -p ${HOME}/.config/Code/User
 RUN	mkdir ${HOME}/.m2
 RUN	mkdir ${HOME}/.gradle
 VOLUME	${HOME}/workspace
+VOLUME	${HOME}/.config/Code/User
 VOLUME	${HOME}/.m2
 VOLUME	${HOME}/.gradle
 

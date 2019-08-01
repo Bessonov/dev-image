@@ -16,9 +16,9 @@ USER_GID=$USER_ID
 
 DOCKER_VERSION="5:18.09.0~3-0~ubuntu-bionic"
 DOCKER_GID=$(cat /etc/group | grep "docker:" | cut -d ":" -f 3)
-DOCKER_COMPOSE_VERSION=1.23.2
+DOCKER_COMPOSE_VERSION=1.24.1
 
-JAVA_CANDIDATE="^8\\..*-oracle"
+JAVA_CANDIDATE="^8\\..*-zulu$"
 
 ANDROID_SDK="build-tools;28.0.3 platform-tools platforms;android-28"
 NVM_VERSION=v0.34.0
@@ -26,7 +26,7 @@ NVM_VERSION=v0.34.0
 # first one becomes default
 NODE_VERSIONS="lts/*"
 
-YVM_VERSION=v3.0.0
+YVM_VERSION=v3.6.1
 # multiple versions delimited by space
 # newest one becomes default
 YARN_VERSIONS="stable"
