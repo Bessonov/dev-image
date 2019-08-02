@@ -71,6 +71,12 @@ volumes:
       type: none
       device: "${WORKSPACE}"
       o: bind
+  vscode_user:
+    driver: local
+    driver_opts:
+      type: none
+      device: "${CURRENT_DIR}/vscode_user"
+      o: bind
   maven-m2:
     driver: local
     driver_opts:

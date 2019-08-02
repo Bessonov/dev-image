@@ -37,9 +37,11 @@ services:
       - "maven-m2:/home/$USER_NAME/.m2"
       - "gradle-dot:/home/$USER_NAME/.gradle"
       - "workspace:/home/$USER_NAME/workspace"
+      - "vscode_user:/home/$USER_NAME/.config/Code/User"
     restart: unless-stopped
 
 volumes:
   workspace:
+  vscode_user:
   maven-m2:
   gradle-dot:
