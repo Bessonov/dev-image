@@ -25,6 +25,8 @@ services:
     stdin_open: true
     tty: true
     privileged: true
+    # give more space for chrome
+    shm_size: 1gb
     environment:
       DISPLAY: "$DISPLAY"
     volumes:
