@@ -7,7 +7,7 @@ A docker image for development
 This image is intended for use to developing applications in ReactJS, react-native, Node.js and others.
 
 The image contains following tools:
-- watchman
+- watchman (can be disabled with `SKIP_WATCHMAN=true`)
 - docker (to manage docker on host)
 - docker-compose
 
@@ -16,13 +16,13 @@ Following management tools:
 - nvm to manage node
 - yvm to manage yarn
 - pip
-- android sdk
+- android sdk (can be disabled with `SKIP_ANDROID=true`)
 
 By default following packages are installed:
-- java 8 (latest)
-- maven (default sdkman)
-- gradle (default sdkman)
-- android tools (android 28)
+- java 8 (zulu, latest, can be disabled with `SKIP_JAVA=true`)
+- maven (default sdkman, can be disabled with `SKIP_MAVEN=true`)
+- gradle (default sdkman, can be disabled with `SKIP_GRADLE=true`)
+- android tools (android 28, can be disabled with `SKIP_ANDROID=true`)
 - node/npm (lts)
 - yarn (stable)
 - aws cli (default pip)

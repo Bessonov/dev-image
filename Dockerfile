@@ -1,5 +1,11 @@
 FROM	ubuntu:18.04
 
+ARG SKIP_WATCHMAN
+ARG SKIP_JAVA
+ARG SKIP_MAVEN
+ARG SKIP_GRADLE
+ARG SKIP_ANDROID
+
 ARG	http_proxy=""
 ARG	https_proxy=""
 ARG	no_proxy=""
@@ -30,24 +36,24 @@ RUN	apt-get update && \
 		sudo iputils-ping vim htop nmap apache2-utils telnet curl wget git-core tree \
 		bash-completion net-tools \
 		# for watchman
-		autoconf automake build-essential python-dev libssl-dev libtool pkg-config \
+		$(${SKIP_WATCHMAN} || echo "autoconf automake build-essential python-dev libssl-dev libtool pkg-config") \
 		# for android sdk
-		libc6-i386 lib32stdc++6 lib32gcc1 lib32ncurses5 lib32z1 \
+		$(${SKIP_ANDROID} || echo "libc6-i386 lib32stdc++6 lib32gcc1 lib32ncurses5 lib32z1") \
 		# for android uiautomatorviewer
-		libswt-gtk-3-java libswt-gtk-3-jni \
+		$(${SKIP_ANDROID} || echo "libswt-gtk-3-java libswt-gtk-3-jni") \
 		# for docker
 		apt-transport-https ca-certificates curl wget gnupg2 software-properties-common \
 		# for sdkman
 		zip unzip \
 		# for cordova-icon
-		imagemagick \
+		$(${SKIP_ANDROID} || echo "imagemagick") \
 		# for react-devtools / electron
 		libgconf-2-4 \
 		# for aws cli
 		groff \
 		&& \
 	# install watchman https://askubuntu.com/a/1040627
-	( \
+	${SKIP_WATCHMAN} || ( \
 		cd /tmp; \
 		curl -L https://github.com/facebook/watchman/archive/v4.9.0.tar.gz | tar xzf -; \
 		mv watchman-* watchman; \
@@ -105,20 +111,20 @@ RUN	curl -s "https://get.sdkman.io" | sed 's/\.bashrc/\.profile/g' | bash
 
 	# install java 8
 ARG	JAVA_CANDIDATE
-RUN	echo "export JAVA_VERSION=$(sdk list java | tr ' ' '\n' | grep "$JAVA_CANDIDATE")" >> ~/.profile
-RUN	echo y | sdk install java $JAVA_VERSION && \
-	sdk flush broadcast && sdk flush archives && sdk flush temp
+RUN	${SKIP_JAVA} || (echo "export JAVA_VERSION=$(sdk list java | tr ' ' '\n' | grep "$JAVA_CANDIDATE")" >> ~/.profile)
+RUN	${SKIP_JAVA} || (echo y | sdk install java $JAVA_VERSION && \
+	sdk flush broadcast && sdk flush archives && sdk flush temp)
 
 	# install latest maven
-RUN	sdk install maven && \
-	sdk flush broadcast && sdk flush archives && sdk flush temp
+RUN	${SKIP_MAVEN} || (sdk install maven && \
+	sdk flush broadcast && sdk flush archives && sdk flush temp)
 
 # install android sdk
 	# install latest gradle
 ENV	GRADLE_USER_HOME="$HOME/.gradle"
 
-RUN	sdk install gradle && \
-	sdk flush broadcast && sdk flush archives && sdk flush temp
+RUN	${SKIP_GRADLE} || (sdk install gradle && \
+	sdk flush broadcast && sdk flush archives && sdk flush temp)
 
 	# expected for ~/.android/repositories.cfg
 ENV	ANDROID_HOME=$HOME/.android
@@ -128,17 +134,17 @@ RUN	mkdir -p $ANDROID_HOME
 	#RUN touch ~/.android/repositories.cfg
 WORKDIR	$ANDROID_HOME
 
-RUN	curl https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip > sdk.zip && \
+RUN	${SKIP_ANDROID} || (curl https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip > sdk.zip && \
         unzip sdk.zip && \
-        rm sdk.zip
+        rm sdk.zip)
 
 ENV	PATH "${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
 
 #RUN	echo "export PROXY_HOST_DNS=${PROXY_HOST#"http://"}" >> ${HOME}/.profile
 #RUN	env
 
-RUN	yes | sdkmanager --licenses || true
-RUN	for SDK in $ANDROID_SDK; do sdkmanager $SDK; done
+RUN	${SKIP_ANDROID} || (yes | sdkmanager --licenses || true)
+RUN	${SKIP_ANDROID} || (for SDK in $ANDROID_SDK; do sdkmanager $SDK; done)
 
 WORKDIR	${HOME}
 # /install android sdk
