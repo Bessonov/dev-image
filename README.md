@@ -91,6 +91,86 @@ volumes:
       o: bind
 ```
 
+# Remote development with Visual Studio Code
+
+Remote development is a [great feature](https://code.visualstudio.com/docs/remote/remote-overview) of vscode. On remote host you need docker 18.09+, ssh-server and an user. Make sure to use public key based authentication and add your ssh key to `ssh-agent`.
+
+Depending on your use case you need following files:
+- `docker-compose.override.yml` is used as usual to define additional services and defaults. It's used for both, local and remote development.
+- `docker-compose.local.yml` is used for definitions for local instance. Usually you want to put local volume mounts here.
+- `docker-compose.remote.yml` contains definitions, which are executed on remote host.
+- `local.sh` contains settings and mappings for development.
+
+## Common configuration with `docker-compose.override.yml`
+
+As defined before you store here your project specific configuration. If you want to switch between local development and remote development, define named ports here instead of `docker-compose.remote.yml`.
+```yaml
+version: "3.3"
+
+services:
+  dev:
+    ports:
+      - "127.0.0.1:$BACKEND_PORT:3000"
+      - "127.0.0.1:$FRONTEND_PORT:8080"
+  # other services
+```
+
+## Local configuration with `docker-compose.local.yml`
+
+You can provide here some additional configuration for local development only. It can be a good idea to mount your `~/.ssh` folder to pass ssh configuration and `known_hosts`:
+```yaml
+version: "3.3"
+volumes:
+  ssh:
+    driver: local
+    driver_opts:
+      type: none
+      device: "${HOME}/.ssh"
+      o: bind
+```
+
+## Remote configuration with `docker-compose.remote.yml`
+
+Usually you want override volume mounts to store your files on remote file system instead of volumes. But also add another services, which you don't ant to run on your local host.
+
+## Configure mapping of named ports
+
+To map container ports to local ports add following configuration to `local.sh`:
+
+```bash
+BASE_PORT=60000
+
+PORT_MAPPING=(
+	# port name		local port
+	BACKEND_PORT	3000
+	FRONTEND_PORT	8080
+	# other ports
+)
+```
+
+This configuration maps remote container port `3000` to remote host port `60000` and container port `8080` to next remote host port `60001` and so on. Variable `BASE_PORT` allows usage of the same remote docker host by multiple users. Just ensure that every user has different `BASE_PORT` and enough ports in between them.
+
+But this configuration do another very nice thing. This allows port forwarding from containers to your local host! Just run `./extras/forwarding.sh` and `BACKEND_PORT` is forwarded to `3000` and `FRONTEND_PORT` to `8080` on local host. If you want to map your local containers, just start it with local flag: `LOCAL=true ./extras/forwarding.sh`.
+
+Additionaly, you must set following variables in `local.sh`:
+```bash
+# connection to the remote host with docker
+REMOTE_HOST=ssh://user@ip:port
+
+# suffix for docker-compose project to allows multiple users
+PROJECT_SUFFIX=yourname
+```
+
+Then build the image on remote host and start services:
+```bash
+REMOTE=true ./build.sh
+REMOTE=true ./docker-compose.sh up -d
+```
+
+Go into your local container with `./bash.sh`, start the `code` and install the `ms-vscode-remote.vscode-remote-extensionpack` extension. Then attach to the running remote dev container with your project suffix and enjoy power of your server.
+
+BTW, [sshcode](https://github.com/cdr/sshcode) is a way simpler, if you don't need or want to run everything in containers.
+
 License
 -------
 
@@ -115,3 +195,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+

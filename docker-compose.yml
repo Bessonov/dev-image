@@ -29,6 +29,8 @@ services:
     shm_size: 1gb
     environment:
       DISPLAY: "$DISPLAY"
+      SSH_AUTH_SOCK: "$SSH_AUTH_SOCK"
+      DOCKER_HOST: "$DOCKER_HOST_IN_CONTAINER"
     volumes:
       # to display vsc, chrome
       - "/tmp/.X11-unix:/tmp/.X11-unix"
@@ -36,6 +38,9 @@ services:
       - "/dev/bus/usb:/dev/bus/usb"
       # run docker commands
       - "/var/run/docker.sock:/var/run/docker.sock"
+      # ssh agent
+      - "$SSH_AUTH_DIR:$SSH_AUTH_DIR"
+      - "ssh:/home/$USER_NAME/.ssh"
       - "maven-m2:/home/$USER_NAME/.m2"
       - "gradle-dot:/home/$USER_NAME/.gradle"
       - "workspace:/home/$USER_NAME/workspace"
@@ -44,6 +49,7 @@ services:
 
 volumes:
   workspace:
+  ssh:
   vscode_user:
   maven-m2:
   gradle-dot:
