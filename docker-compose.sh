@@ -5,9 +5,10 @@ set -euo pipefail
 # export variables
 set -a
 CURRENT_DIR="$(dirname "$(readlink -f "$0")")"
-. "$CURRENT_DIR/defaults.sh"
+ROOT_DIR="$CURRENT_DIR"
+. "$ROOT_DIR/defaults.sh"
 set +a
 
-# do this or pass overrides with `-f` too
-cd "$CURRENT_DIR"
-docker-compose --project-name="$PROJECT_NAME" "$@"
+cd "$ROOT_DIR"
+
+DOCKER_HOST=${DOCKER_COMPOSE_HOST} $DOCKER_COMPOSE $DOCKER_COMPOSE_OPTS --project-name="$PROJECT_NAME" "$@"
