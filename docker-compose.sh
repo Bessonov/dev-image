@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# set local as default
+REMOTE=${REMOTE:-false}
+
 # export variables
 set -a
 CURRENT_DIR="$(dirname "$(readlink -f "$0")")"

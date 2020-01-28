@@ -15,7 +15,7 @@ if [ ! $I_CAN_DO_SOMETHING_USEFUL_FOR_YOU ]; then
 	return
 fi
 
-if "${REMOTE:-false}"; then
+if $REMOTE; then
 	echo "remote execution"
 	IMAGE_NAME=remote-dev-${PROJECT_SUFFIX}
 	PROJECT_NAME=remote-dev-${PROJECT_SUFFIX}
@@ -27,6 +27,7 @@ if "${REMOTE:-false}"; then
 		if [[ " ${GET_IDS_FOR[@]} " =~ " ${1:-} " ]]; then
 			SSH_ARGS=$(docker_host_to_ssh "$REMOTE_HOST")
 			USER_ID=$(ssh $SSH_ARGS 'id -u')
+			USER_NAME=$(ssh $SSH_ARGS 'whoami')
 			USER_GID=$USER_ID
 			if [ "${1:-}" == "build" ]; then
 				DOCKER_GID=$(ssh $SSH_ARGS 'cat /etc/group | grep "docker:" | cut -d ":" -f 3')

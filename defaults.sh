@@ -9,6 +9,9 @@ SKIP_MAVEN=false
 SKIP_GRADLE=false
 SKIP_ANDROID=false
 
+# set local as default
+REMOTE=${REMOTE:-false}
+
 http_proxy=""
 https_proxy=""
 no_proxy=""
