@@ -131,7 +131,7 @@ volumes:
 
 ## Remote configuration with `docker-compose.remote.yml`
 
-Usually you want override volume mounts to store your files on remote file system instead of volumes. But also add another services, which you don't ant to run on your local host.
+Usually you want override volume mounts to store your files on remote file system instead of volumes. It's a good idea to have same path in container mount and on remote system. But also add another services, which you don't want to run on your local host.
 
 ## Configure mapping of named ports
 
@@ -150,7 +150,7 @@ PORT_MAPPING=(
 
 This configuration maps remote container port `3000` to remote host port `60000` and container port `8080` to next remote host port `60001` and so on. Variable `BASE_PORT` allows usage of the same remote docker host by multiple users. Just ensure that every user has different `BASE_PORT` and enough ports in between them.
 
-But this configuration do another very nice thing. This allows port forwarding from containers to your local host! Just run `./extras/forwarding.sh` and `BACKEND_PORT` is forwarded to `3000` and `FRONTEND_PORT` to `8080` on local host. If you want to map your local containers, just start it with local flag: `LOCAL=true ./extras/forwarding.sh`.
+But this configuration do another very nice thing. This allows port forwarding from containers to your local host! Just run `./extras/forwarding.sh` and `BACKEND_PORT` is forwarded to `3000` and `FRONTEND_PORT` to `8080` on local host. If you want to map your local containers, just start it with local flag: `REMOTE=false ./extras/forwarding.sh`.
 
 Additionaly, you must set following variables in `local.sh`:
 ```bash
@@ -170,6 +170,57 @@ REMOTE=true ./docker-compose.sh up -d
 Go into your local container with `./bash.sh`, start the `code` and install the `ms-vscode-remote.vscode-remote-extensionpack` extension. Then attach to the running remote dev container with your project suffix and enjoy power of your server.
 
 BTW, [sshcode](https://github.com/cdr/sshcode) is a way simpler, if you don't need or want to run everything in containers.
+
+## File synchronisation
+
+Probably you want to synchronize remote and local files. It makes easier to switch between remote and local development, for example, to work sometimes without network. It makes also easier to copy files beteen environments. Just put files in sync folder and magic happens! For this reason I use [mirror](https://github.com/stephenh/mirror).
+
+To setup `mirror` add following to your `docker-compose.override.yml`:
+```yaml
+...
+services:
+...
+  mirror:
+    image: quay.io/stephenh/mirror:1.3.8
+    user: "$USER_ID:$USER_GID"
+    init: true # need 3.7
+    ports:
+      - "127.0.0.1:$MIRROR_PORT:49172"
+```
+
+To `docker-compose.local.yml` (adjust folder and parameters to your needs):
+```yaml
+...
+services:
+...
+  mirror:
+    network_mode: host
+    volumes:
+      - "${WORKSPACE}/remote:/data"
+    command: client --include '.git' --local-root /data --remote-root /data --host localhost
+```
+
+To `docker-compose.remote.yml`:
+```yaml
+services:
+  mirror:
+    volumes:
+      - "workspace:/data"
+    command: server
+```
+
+To `local.sh`:
+```bash
+PORT_MAPPING=(
+...
+)
+
+if $REMOTE; then
+	PORT_MAPPING+=(MIRROR_PORT 49172)
+fi
+```
+
+After that just run `REMOTE=true ./docker-compose.sh up -d && ./docker-compose.sh up -d` and restart port forwarding.
 
 License
 -------

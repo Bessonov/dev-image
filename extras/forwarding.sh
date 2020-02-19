@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+
+# in most cases you want to forward remote ports
+REMOTE=${REMOTE:-true}
+
 # export variables
 set -a
 CURRENT_DIR="$(dirname "$(readlink -f "$0")")"
@@ -28,10 +32,10 @@ for ROW_INDEX in `seq $ROWS_COUNT`; do
 	LOCAL_FORWARD_ARGS="${LOCAL_FORWARD_ARGS} docker run --rm --name forwarding-$PORT_NAME --network host alpine/socat tcp-listen:$LOCAL_PORT,fork,reuseaddr tcp-connect:127.0.0.1:$REMOTE_PORT &"
 done
 
-if ${LOCAL:-false}; then
-	echo "local forwarding"
-	bash -c "($LOCAL_FORWARD_ARGS wait)"
-else
+if ${REMOTE}; then
 	echo "remote forwarding"
 	ssh $REMOTE_FORWARD_ARGS $(docker_host_to_ssh "$REMOTE_HOST")
+else
+	echo "local forwarding"
+	bash -c "($LOCAL_FORWARD_ARGS wait)"
 fi
