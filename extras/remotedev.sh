@@ -39,7 +39,7 @@ if $REMOTE; then
 	fi
 else
 	echo "local execution"
-	if [ ! -z "$REMOTE_HOST" ]; then
+	if [ -n "${REMOTE_HOST:-}" ]; then
 		echo "docker host in container $REMOTE_HOST"
 		DOCKER_HOST_IN_CONTAINER=$REMOTE_HOST
 	fi
