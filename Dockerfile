@@ -51,6 +51,8 @@ RUN	apt-get update && \
 		libgconf-2-4 \
 		# for aws cli
 		groff \
+		# terraform visualization
+		graphviz \
 		&& \
 	# install watchman https://askubuntu.com/a/1040627
 	${SKIP_WATCHMAN} || ( \
@@ -111,7 +113,7 @@ RUN	curl -s "https://get.sdkman.io" | sed 's/\.bashrc/\.profile/g' | bash
 
 	# install java 8
 ARG	JAVA_CANDIDATE
-RUN	${SKIP_JAVA} || (echo "export JAVA_VERSION=$(sdk list java | tr ' ' '\n' | grep "$JAVA_CANDIDATE")" >> ~/.profile)
+RUN	${SKIP_JAVA} || (echo "export JAVA_VERSION=$(sdk list java | tr ' ' '\n' | grep "$JAVA_CANDIDATE" | sort -h -r | head -n 1)" >> ~/.profile)
 RUN	${SKIP_JAVA} || (echo y | sdk install java $JAVA_VERSION && \
 	sdk flush broadcast && sdk flush archives && sdk flush temp)
 
